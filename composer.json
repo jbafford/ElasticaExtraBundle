@@ -1,7 +1,7 @@
 {
     "name": "jbafford/elastica-extra-bundle",
     "type": "symfony-bundle",
-    "description": "Provides additional functionality asaround ElasticaBundle",
+    "description": "Provides additional functionality around ElasticaBundle",
     "keywords": ["bafford", "elastica", "elasticsearch"],
     "license": "MIT",
     "authors": [
