@@ -1,0 +1,7 @@
+services:
+    bafford_elasticaextra:
+        class: Bafford\ElasticaExtraBundle\Provider\ElasticSearchProvider
+        calls:
+            - [ setIndex, [%bafford_elasticsearch.index%] ]
+            - [ setContainer, ["@service_container"] ]
+
