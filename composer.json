@@ -3,6 +3,7 @@
     "type": "symfony-bundle",
     "description": "Provides additional functionality around ElasticaBundle",
     "keywords": ["bafford", "elastica", "elasticsearch"],
+    "homepage": "https://github.com/jbafford/ElasticaExtraBundle",
     "license": "MIT",
     "authors": [
         { "name": "John Bafford" }
