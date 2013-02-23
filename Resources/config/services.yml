@@ -1,7 +1,8 @@
 services:
     bafford_elasticaextra:
         class: Bafford\ElasticaExtraBundle\Provider\ElasticSearchProvider
+        arguments:
+            config: %bafford_elastica_extra.config%
         calls:
-            - [ setIndex, [%bafford_elasticsearch.index%] ]
             - [ setContainer, ["@service_container"] ]
 

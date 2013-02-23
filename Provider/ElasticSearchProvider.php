@@ -8,6 +8,11 @@ class ElasticSearchProvider extends ContainerAware
 {
     protected $index;
     
+    public function __construct($config)
+    {
+    	$this->index = $config['defaultIndex'];
+    }
+    
     public function setIndex($indexName)
     {
         $this->index = $indexName;

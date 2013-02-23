@@ -18,7 +18,16 @@ class Configuration implements ConfigurationInterface
     public function getConfigTreeBuilder()
     {
         $treeBuilder = new TreeBuilder();
-        $rootNode = $treeBuilder->root('bafford_elasticaextra');
+        $rootNode = $treeBuilder->root('bafford_elastica_extra');
+        
+        $rootNode
+            ->children()
+                ->scalarNode('defaultIndex')
+                    ->isRequired()
+                    ->info('Sets the default index to use.')
+                ->end()
+            ->end()
+        ;
 
         // Here you should define the parameters that are allowed to
         // configure your bundle. See the documentation linked above for
