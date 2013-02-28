@@ -18,6 +18,45 @@ class ElasticSearchProvider extends ContainerAware
         $this->index = $indexName;
     }
     
+    public function basicSearchTerms(array $queries = [], array $filters = [])
+    {
+        $crit = [];
+        
+        if(!$queries)
+            $queries = ['match_all' => []];
+        else
+            $queries = array_values($queries);
+        
+        if($filters)
+        {
+            $filters = array_values($filters);
+            
+            if(count($filters) == 1)
+                $filter = $filters[0];
+            else
+                $filter = ['and' => $filters];
+            
+            $filters = $filter;
+        }
+        
+        if(count($queries) > 1)
+            $queries = ['bool' => ['must' => $queries]];
+        else
+            $queries = $queries[0];
+        
+        if(!$filters)
+            return ['query' => $queries];
+        else
+            return [
+                'query' => [
+                    'filtered' => [
+                        'filter' => $filters,
+                        'query' => $queries,
+                    ],
+                ],
+            ];
+    }
+    
     public function doSearch($type, array $terms)
     {
         $query = new \Elastica_Query($terms);
@@ -65,7 +104,12 @@ class ElasticSearchProvider extends ContainerAware
                 $resultMapFn = function($v) use($field) { return $v->getFields()[$field]; };
         }
         
+        $stopwatch = $this->container->get('debug.stopwatch');
+        $stopwatch->start('elasticsearchQuery', 'ElasticaExtraBundle');
+        
         $results = $this->doSearch($type, $terms);
+        
+        $stopwatch->stop('elasticsearchQuery');
         
         $arr = array_map($resultMapFn, $results->getResults());
         
