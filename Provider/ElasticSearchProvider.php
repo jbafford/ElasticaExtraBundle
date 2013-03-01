@@ -23,7 +23,7 @@ class ElasticSearchProvider extends ContainerAware
         $crit = [];
         
         if(!$queries)
-            $queries = ['match_all' => []];
+            $queries = [['match_all' => []]];
         else
             $queries = array_values($queries);
         
