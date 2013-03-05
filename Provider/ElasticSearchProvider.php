@@ -20,8 +20,6 @@ class ElasticSearchProvider extends ContainerAware
     
     public function basicSearchTerms(array $queries = [], array $filters = [])
     {
-        $crit = [];
-        
         if(!$queries)
             $queries = [['match_all' => []]];
         else
