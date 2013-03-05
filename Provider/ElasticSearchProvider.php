@@ -102,12 +102,7 @@ class ElasticSearchProvider extends ContainerAware
                 $resultMapFn = function($v) use($field) { return $v->getFields()[$field]; };
         }
         
-        $stopwatch = $this->container->get('debug.stopwatch');
-        $stopwatch->start('elasticsearchQuery', 'ElasticaExtraBundle');
-        
         $results = $this->doSearch($type, $terms);
-        
-        $stopwatch->stop('elasticsearchQuery');
         
         $arr = array_map($resultMapFn, $results->getResults());
         
