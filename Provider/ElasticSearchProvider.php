@@ -59,7 +59,7 @@ class ElasticSearchProvider extends ContainerAware
     {
         $query = new \Elastica_Query($terms);
         
-        $itemType = $this->container->get("foq_elastica.index.$this->index.$type");
+        $itemType = $this->container->get("fos_elastica.index.$this->index.$type");
         
         return $itemType->search($query);
     }
