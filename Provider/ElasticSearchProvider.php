@@ -57,7 +57,7 @@ class ElasticSearchProvider extends ContainerAware
     
     public function doSearch($type, array $terms)
     {
-        $query = new \Elastica_Query($terms);
+        $query = new \Elastica\Query($terms);
         
         $itemType = $this->container->get("fos_elastica.index.$this->index.$type");
         
