@@ -55,16 +55,7 @@ class ElasticSearchProvider extends ContainerAware
             ];
     }
     
-    public function doSearch($type, array $terms)
-    {
-        $query = new \Elastica\Query($terms);
-        
-        $itemType = $this->container->get("fos_elastica.index.$this->index.$type");
-        
-        return $itemType->search($query);
-    }
-    
-    public function search($type, array $terms)
+    protected function makeResultMap($terms)
     {
         $resultType = 'source';
         if(!empty($terms['fields']))
@@ -101,6 +92,35 @@ class ElasticSearchProvider extends ContainerAware
             case 'field':
                 $resultMapFn = function($v) use($field) { return $v->getFields()[$field]; };
         }
+        
+        return $resultMapFn;
+    }
+    
+    public function doSearch($type, array $terms, array $options = array())
+    {
+        $query = new \Elastica\Query($terms);
+        
+        $itemType = $this->container->get("fos_elastica.index.$this->index.$type");
+        
+        return $itemType->search($query, $options);
+    }
+    
+    public function searchWithScroll($type, array $terms)
+    {
+        $resultMapFn = $this->makeResultMap($terms);
+        
+        $query = new \Elastica\Query($terms);
+        $itemType = $this->container->get("fos_elastica.index.$this->index.$type");
+        $results = $itemType->search($query, ['search_type' => 'scan', 'scroll' => '1m']);
+    	
+    	$scrollID = $results->getResponse()->getScrollId();
+        
+        return new ElasticScrollSearch($itemType, $scrollID, $resultMapFn);
+    }
+    
+    public function search($type, array $terms, array $options = array())
+    {
+        $resultMapFn = $this->makeResultMap($terms);
         
         $results = $this->doSearch($type, $terms);
         
