@@ -118,6 +118,15 @@ class ElasticSearchProvider extends ContainerAware
         return new ElasticScrollSearch($itemType, $scrollID, $resultMapFn);
     }
     
+    public function searchPaginated($type, array $terms)
+    {
+        $query = new \Elastica\Query($terms);
+        
+        $finder = $this->container->get("fos_elastica.finder.$this->index.$type");
+        
+        return $finder->createPaginatorAdapter($query);
+    }
+    
     public function search($type, array $terms, array $options = array())
     {
         $resultMapFn = $this->makeResultMap($terms);
