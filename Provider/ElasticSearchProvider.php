@@ -105,17 +105,21 @@ class ElasticSearchProvider extends ContainerAware
         return $itemType->search($query, $options);
     }
     
-    public function searchWithScroll($type, array $terms)
+    public function searchWithScroll($type, array $terms, array $options = array())
     {
         $resultMapFn = $this->makeResultMap($terms);
         
+        $options = array_merge(array(
+            'scroll' => '1m',
+        ), $options);
+        
         $query = new \Elastica\Query($terms);
         $itemType = $this->container->get("fos_elastica.index.$this->index.$type");
-        $results = $itemType->search($query, ['search_type' => 'scan', 'scroll' => '1m']);
+        $results = $itemType->search($query, ['search_type' => 'scan', 'scroll' => $options['scroll']]);
     	
     	$scrollID = $results->getResponse()->getScrollId();
         
-        return new ElasticScrollSearch($itemType, $scrollID, $resultMapFn);
+        return new ElasticScrollSearch($itemType, $scrollID, $resultMapFn, $options);
     }
     
     public function searchPaginated($type, array $terms)

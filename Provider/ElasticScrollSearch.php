@@ -9,24 +9,29 @@ class ElasticScrollSearch implements \Iterator
     protected $itemType = null;
     protected $scrollID = null;
     protected $resultMap = null;
+    protected $options = null;
     
     protected $hasStarted = false;
     protected $results = false;
     protected $step = false;
     protected $cnt = 0;
     
-    public function __construct($itemType, $scrollID, $resultMap)
+    /*
+        $options must contain ['scroll' => scroll duration]
+    */
+    public function __construct($itemType, $scrollID, $resultMap, array $options)
     {
         $this->itemType = $itemType;
         $this->scrollID = $scrollID;
         $this->resultMap = $resultMap;
+        $this->options = $options;
     }
     
     protected function getMoreResults()
     {
         $this->hasStarted = true;
         
-        $results = $this->itemType->search([], ['scroll_id' => $this->scrollID]);
+        $results = $this->itemType->search([], ['scroll' => $this->options['scroll'], 'scroll_id' => $this->scrollID]);
         
         if(!$results)
             $this->results = null;
