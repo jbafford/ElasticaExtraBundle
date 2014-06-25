@@ -135,7 +135,7 @@ class ElasticSearchProvider extends ContainerAware
     {
         $resultMapFn = $this->makeResultMap($terms);
         
-        $results = $this->doSearch($type, $terms);
+        $results = $this->doSearch($type, $terms, $options);
         
         $arr = array_map($resultMapFn, $results->getResults());
         
