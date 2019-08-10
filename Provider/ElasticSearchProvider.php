@@ -2,11 +2,14 @@
 
 namespace Bafford\ElasticaExtraBundle\Provider;
 
-use Symfony\Component\DependencyInjection\ContainerAware;
+use Symfony\Component\DependencyInjection\ContainerAwareInterface;
+use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
-class ElasticSearchProvider extends ContainerAware
+class ElasticSearchProvider implements ContainerAwareInterface
 {
     protected $index;
+    
+    use ContainerAwareTrait;
     
     public function __construct($config)
     {

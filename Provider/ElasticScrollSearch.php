@@ -2,8 +2,6 @@
 
 namespace Bafford\ElasticaExtraBundle\Provider;
 
-use Symfony\Component\DependencyInjection\ContainerAware;
-
 class ElasticScrollSearch implements \Iterator
 {
     protected $itemType = null;
