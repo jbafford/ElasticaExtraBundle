@@ -9,9 +9,13 @@ class ElasticScrollSearch implements \Iterator
     protected $resultMap = null;
     protected $options = null;
     
+    /** @var bool */
     protected $hasStarted = false;
+    /** @var bool */
     protected $results = false;
+    /** @var bool */
     protected $step = false;
+    /** @var int */
     protected $cnt = 0;
     
     /*
@@ -47,7 +51,7 @@ class ElasticScrollSearch implements \Iterator
         return $rm($this->results[$this->step]);
     }
     
-    public function key()
+    public function key() : int
     {
         return $this->cnt;
     }
@@ -64,7 +68,7 @@ class ElasticScrollSearch implements \Iterator
             throw new \Exception('Iteration has already started; can\'t restart.');
     }
     
-    public function valid()
+    public function valid() : bool
     {
         if(!$this->results || !isset($this->results[$this->step]))
             $this->getMoreResults();

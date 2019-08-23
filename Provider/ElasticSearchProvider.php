@@ -7,6 +7,7 @@ use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 class ElasticSearchProvider implements ContainerAwareInterface
 {
+    /** @var string */
     protected $index;
     
     use ContainerAwareTrait;
@@ -16,38 +17,41 @@ class ElasticSearchProvider implements ContainerAwareInterface
     	$this->index = $config['defaultIndex'];
     }
     
-    public function setIndex($indexName)
+    public function setIndex(string $indexName)
     {
         $this->index = $indexName;
     }
     
     public function basicSearchTerms(array $queries = [], array $filters = [])
     {
-        if(!$queries)
+        if(!$queries) {
             $queries = [['match_all' => []]];
-        else
+        } else {
             $queries = array_values($queries);
+        }
         
         if($filters)
         {
             $filters = array_values($filters);
             
-            if(count($filters) == 1)
+            if(count($filters) == 1) {
                 $filter = $filters[0];
-            else
+            } else {
                 $filter = ['and' => $filters];
+            }
             
             $filters = $filter;
         }
         
-        if(count($queries) > 1)
+        if(count($queries) > 1) {
             $queries = ['bool' => ['must' => $queries]];
-        else
+        } else {
             $queries = $queries[0];
+        }
         
-        if(!$filters)
+        if(!$filters) {
             return ['query' => $queries];
-        else
+        } else {
             return [
                 'query' => [
                     'filtered' => [
@@ -56,50 +60,49 @@ class ElasticSearchProvider implements ContainerAwareInterface
                     ],
                 ],
             ];
+        }
     }
     
-    protected function makeResultMap($terms)
+    protected function makeResultMap($terms) : \Closure
     {
         $resultType = 'source';
-        if(!empty($terms['fields']))
-        {
+        if(!empty($terms['fields'])) {
             $hasID = (array_search('_id', $terms['fields']) !== false);
             
-            if(count($terms['fields']) == 1)
-            {
+            if(count($terms['fields']) == 1) {
                 $field = array_values($terms['fields'])[0];
                 $resultType = ($hasID ? 'id' : 'field');
-            }
-            else
+            } else {
                 $resultType = ($hasID ? 'fields+id' : 'fields');
+            }
         }
         
-        switch($resultType)
-        {
+        switch($resultType) {
             case 'id':
-                $resultMapFn = function($v) { return $v->getId(); };
+                return function($v) { return $v->getId(); };
                 break;
             
             case 'source':
-                $resultMapFn = function($v) { return array_merge(['_id' => $v->getId()], $v->getSource()); };
+                return function($v) { return array_merge(['_id' => $v->getId()], $v->getSource()); };
                 break;
             
             case 'fields':
-                $resultMapFn = function($v) { return $v->getFields(); };
+                return function($v) { return $v->getFields(); };
                 break;
             
             case 'fields+id':
-                $resultMapFn = function($v) { return array_merge(['_id' => $v->getId()], $v->getFields()); };
+                return function($v) { return array_merge(['_id' => $v->getId()], $v->getFields()); };
                 break;
             
             case 'field':
-                $resultMapFn = function($v) use($field) { return $v->getFields()[$field]; };
+                return function($v) use($field) { return $v->getFields()[$field]; };
+            
+            default:
+                throw new \InvalidArgumentException("Unknown resultType '$resultType'");
         }
-        
-        return $resultMapFn;
     }
     
-    public function doSearch($type, array $terms, array $options = array())
+    public function doSearch(string $type, array $terms, array $options = [])
     {
         $query = new \Elastica\Query($terms);
         
@@ -108,13 +111,13 @@ class ElasticSearchProvider implements ContainerAwareInterface
         return $itemType->search($query, $options);
     }
     
-    public function searchWithScroll($type, array $terms, array $options = array())
+    public function searchWithScroll(string $type, array $terms, array $options = []) : ElasticScrollSearch
     {
         $resultMapFn = $this->makeResultMap($terms);
         
-        $options = array_merge(array(
+        $options = array_merge([
             'scroll' => '1m',
-        ), $options);
+        ], $options);
         
         $query = new \Elastica\Query($terms);
         $itemType = $this->container->get("fos_elastica.index.$this->index.$type");
@@ -134,7 +137,7 @@ class ElasticSearchProvider implements ContainerAwareInterface
         return $finder->createPaginatorAdapter($query);
     }
     
-    public function search($type, array $terms, array $options = array())
+    public function search(string $type, array $terms, array $options = []) : array
     {
         $resultMapFn = $this->makeResultMap($terms);
         
@@ -142,9 +145,9 @@ class ElasticSearchProvider implements ContainerAwareInterface
         
         $arr = array_map($resultMapFn, $results->getResults());
         
-        return array(
+        return [
             'total' => $results->getTotalHits(),
             'results' => $arr,
-        );
+        ];
     }
 }
