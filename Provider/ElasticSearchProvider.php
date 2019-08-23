@@ -25,7 +25,7 @@ class ElasticSearchProvider implements ContainerAwareInterface
     public function basicSearchTerms(array $queries = [], array $filters = [])
     {
         if(!$queries) {
-            $queries = [['match_all' => []]];
+            $queries = [['match_all' => (object)null]];
         } else {
             $queries = array_values($queries);
         }
@@ -37,7 +37,7 @@ class ElasticSearchProvider implements ContainerAwareInterface
             if(count($filters) == 1) {
                 $filter = $filters[0];
             } else {
-                $filter = ['and' => $filters];
+                $filter = $filters;
             }
             
             $filters = $filter;
@@ -54,9 +54,9 @@ class ElasticSearchProvider implements ContainerAwareInterface
         } else {
             return [
                 'query' => [
-                    'filtered' => [
+                    'bool' => [
+                        'must' => $queries,
                         'filter' => $filters,
-                        'query' => $queries,
                     ],
                 ],
             ];

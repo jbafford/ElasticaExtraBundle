@@ -9,10 +9,10 @@
         { "name": "John Bafford" }
     ],
     "require": {
-        "php": ">=5.3.2",
+        "php": ">=7.1",
         "symfony/symfony": ">=3.4",
-        "friendsofsymfony/elastica-bundle": "~4",
-        "ruflin/elastica": "~3"
+        "friendsofsymfony/elastica-bundle": "^5.1",
+        "ruflin/elastica": "^5"
     },
     "autoload": {
         "psr-4": { "Bafford\\ElasticaExtraBundle\\": "" }
