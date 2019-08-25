@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 namespace Bafford\ElasticaExtraBundle\Provider;
 
@@ -7,20 +7,7 @@ use Symfony\Component\DependencyInjection\ContainerAwareTrait;
 
 class ElasticSearchProvider implements ContainerAwareInterface
 {
-    /** @var string */
-    protected $index;
-    
     use ContainerAwareTrait;
-    
-    public function __construct($config)
-    {
-    	$this->index = $config['defaultIndex'];
-    }
-    
-    public function setIndex(string $indexName)
-    {
-        $this->index = $indexName;
-    }
     
     public function basicSearchTerms(array $queries = [], array $filters = [])
     {
@@ -102,16 +89,16 @@ class ElasticSearchProvider implements ContainerAwareInterface
         }
     }
     
-    public function doSearch(string $type, array $terms, array $options = [])
+    public function doSearch(string $index, string $type, array $terms, array $options = [])
     {
         $query = new \Elastica\Query($terms);
         
-        $itemType = $this->container->get("fos_elastica.index.$this->index.$type");
+        $itemType = $this->container->get("fos_elastica.index.$index.$type");
         
         return $itemType->search($query, $options);
     }
     
-    public function searchWithScroll(string $type, array $terms, array $options = []) : ElasticScrollSearch
+    public function searchWithScroll(string $index, string $type, array $terms, array $options = []) : ElasticScrollSearch
     {
         $resultMapFn = $this->makeResultMap($terms);
         
@@ -120,7 +107,7 @@ class ElasticSearchProvider implements ContainerAwareInterface
         ], $options);
         
         $query = new \Elastica\Query($terms);
-        $itemType = $this->container->get("fos_elastica.index.$this->index.$type");
+        $itemType = $this->container->get("fos_elastica.index.$index.$type");
         $results = $itemType->search($query, ['search_type' => 'scan', 'scroll' => $options['scroll']]);
     	
     	$scrollID = $results->getResponse()->getScrollId();
@@ -128,20 +115,20 @@ class ElasticSearchProvider implements ContainerAwareInterface
         return new ElasticScrollSearch($itemType, $scrollID, $resultMapFn, $options);
     }
     
-    public function searchPaginated($type, array $terms)
+    public function searchPaginated(string $index, string $type, array $terms)
     {
         $query = new \Elastica\Query($terms);
         
-        $finder = $this->container->get("fos_elastica.finder.$this->index.$type");
+        $finder = $this->container->get("fos_elastica.finder.$index.$type");
         
         return $finder->createPaginatorAdapter($query);
     }
     
-    public function search(string $type, array $terms, array $options = []) : array
+    public function search(string $index, string $type, array $terms, array $options = []) : array
     {
         $resultMapFn = $this->makeResultMap($terms);
         
-        $results = $this->doSearch($type, $terms, $options);
+        $results = $this->doSearch($index, $type, $terms, $options);
         
         $arr = array_map($resultMapFn, $results->getResults());
         
